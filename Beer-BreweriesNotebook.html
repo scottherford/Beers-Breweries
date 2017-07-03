@@ -1,0 +1,103 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+---
+title: "Beer-Breweries"
+author: "Scott Herford"
+date: "July 2, 2017"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Beer & Breweries Case Study
+
+The following case study examines beer breweries as well as ABV and IBU content. Particularly, we are interested in conducting an exploratory data analysis for the purpose of determining whether the relationship between alcohol content(abv) and international bitterness units(ibu) is significant.  Lastely, if a relatioship does exist, we want to observe the overall strength of the relationship. 
+
+### Number of Breweries by State
+
+```{r, echo=TRUE}
+table(Breweries$State)
+```
+
+### Beer & Breweries Datasets Merged(First & Last Observations are listed) 
+
+```{r, echo=TRUE}
+MergeBeerBrew <- merge(Beers, Breweries, by.x=("Brewery_id"), by.y=("Brew_ID"))
+head(MergeBeerBrew, 6)
+```
+
+```{r, echo=TRUE}
+View(MergeBeerBrew)
+tail(MergeBeerBrew)
+```
+
+### No. of NAs located in each column of the dataset displayed
+
+```{r, echo=TRUE}
+colSums(is.na(MergeBeerBrew))
+```
+
+### Median alcohol content and international bitterness unit for each state along with bar charts for the purpose of comparison
+
+### In viewing each bar chart, we can see what appears to be quite a bit of variation between states with regard to international bitterness units; however, the variation betweeen states with regard to alcohol beverage content seems to not be significant
+
+```{r, echo=TRUE}
+abv <- tapply(MergeBeerBrew$ABV,MergeBeerBrew$State,median,na.rm=T)
+abv
+```
+
+```{r, echo=TRUE}
+ibu <- tapply(MergeBeerBrew$IBU,MergeBeerBrew$State,median,na.rm=T)
+ibu
+```
+
+```{r, echo=TRUE}
+library(ggplot2)
+barplot(abv)
+barplot(ibu)
+```
+
+### Max values for both ABV & IBU by State
+
+```{r, echo=TRUE}
+which.max(abv)
+max(abv)
+which.max(ibu)
+max(ibu,na.rm=TRUE)
+```
+
+### Summary Statistics (Five Number Summary) for ABV
+
+```{r, echo=TRUE}
+summary(abv)
+```
+
+### A scatterplot is provided for the purpose of exploring the relationship between international bitterness units or bitterness of beer and alcohol beverage content or alcohol content.  
+
+### An initial observation of the scatterplot below suggests a weak, positive linear association between ABV and IBU
+
+```{r, echo=TRUE}
+qplot(abv,ibu)
+```
+
+### To further explore the relationship between the bitterness of beer and alcohol content, we provide a linear regression model to test whether or not the the relationship if it exists, contains a p-value that suggests a statistically significant relationship between the two variables
+
+### The correlation and regression output below shows a Pearson's correlation of 0.282 meaning the the association is weak in strength and positive with regard to direction; therefore, we have a weak, positive linear association between ABV and IBU. Followed up by a correlation test, we have sufficent evidence to reject the null hypothesis of the true correlation being equal to 0 meaning the true correlation is different than 0.  The regression model shows the relationship to be not statistically significant at the .01 level with a calculated p-Value of 0.0472.  Also, the coefficient of determination or adjusted R-Squared of 0.0604 tells us that approximately 6% of the variation in the response variable (ABV) can be explained by the explanatory variable (IBU).
+
+
+```{r, echo=TRUE}
+summary(lm(ibu ~ abv, data=MergeBeerBrew))
+cor.test(ibu, abv)
+```
+
+### Conclusion of Analysis
+
+### By merging the datasets on breweries by State and beer, we were able to explore the number of breweries by State as well as explore the relationship between the level of bitterness of beer and the amount of alcohol content in beer using a correlation procedure and constructing a linear regression model. The top three states with greatest number of breweries from top to bottom were Colorado, California, and Michigan.  The states with the least amount of breweries numbering at one were District of Columbia, North Dakota, South Dakota, and West Virginia. The state with the largest value of international bitterness units was Maine.
+
+### Although a weak, positive correlation between IBU and ABV was detected, the significance of the relationship was not found to be statistically significant at the .01 level; however, it would statistically significant at the .05 level with a p-Value of .0472. Lastly, the overall model itself is very weak in that only 6% of the variation in ABV can be explained by IBU highlighting that the residual or unexplained variance in the model is very high.
